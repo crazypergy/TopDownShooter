@@ -1,0 +1,49 @@
+using UnityEngine;
+
+public class BulletCollision : MonoBehaviour
+{
+    public bool isEnemyBullet = false;
+    private Camera mainCamera;
+
+    void Start()
+    {
+        mainCamera = Camera.main;
+    }
+
+    void Update()
+    {
+        float distance = Mathf.Abs(mainCamera.transform.position.y - transform.position.y);
+        Vector3 leftBottom = mainCamera.ScreenToWorldPoint(new Vector3(0, 0, distance));
+        Vector3 rightTop = mainCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, distance));
+        float buffer = 1f;
+        Vector3 pos = transform.position;
+        Debug.Log("Bullet " + (isEnemyBullet ? "Enemy" : "Player") + " world pos: " + pos + 
+                  " | Bounds: X(" + leftBottom.x + " to " + rightTop.x + "), Z(" + leftBottom.z + " to " + rightTop.z + ")");
+        if (pos.x < leftBottom.x - buffer || pos.x > rightTop.x + buffer ||
+            pos.z < leftBottom.z - buffer || pos.z > rightTop.z + buffer)
+        {
+            Debug.Log("Despawning bullet at world pos: " + pos);
+            Destroy(gameObject);
+        }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("Bullet hit: " + other.gameObject.name + " with tag: " + other.tag);
+        if (isEnemyBullet && other.CompareTag("Player"))
+        {
+            PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
+            if (playerHealth != null)
+            {
+                playerHealth.TakeDamage(1);
+                Debug.Log("Enemy bullet damaged player");
+            }
+            Destroy(gameObject);
+        }
+        else if (!isEnemyBullet && other.CompareTag("Enemy"))
+        {
+            Destroy(other.gameObject);
+            Destroy(gameObject);
+        }
+    }
+}
