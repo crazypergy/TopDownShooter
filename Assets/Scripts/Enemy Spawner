@@ -1,0 +1,39 @@
+using UnityEngine;
+
+public class EnemySpawner : MonoBehaviour
+{
+    public GameObject[] enemyPrefabs;
+    public float spawnRate = 2f;
+    public Camera mainCamera;
+
+    private float nextSpawnTime;
+
+    void Start()
+    {
+        if (mainCamera == null)
+            mainCamera = Camera.main;
+        nextSpawnTime = 0f;
+    }
+
+    void Update()
+    {
+        if (Time.time >= nextSpawnTime)
+        {
+            SpawnEnemy();
+            nextSpawnTime = Time.time + spawnRate;
+        }
+    }
+
+    void SpawnEnemy()
+    {
+        float distance = Mathf.Abs(mainCamera.transform.position.y - transform.position.y);
+        Vector3 leftTop = mainCamera.ScreenToWorldPoint(new Vector3(0, Screen.height, distance));
+        Vector3 rightTop = mainCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, distance));
+        float spawnX = Random.Range(leftTop.x, rightTop.x);
+        float spawnZ = rightTop.z;
+
+        Vector3 spawnPosition = new Vector3(spawnX, 0f, spawnZ);
+        int index = Random.Range(0, enemyPrefabs.Length);
+        Instantiate(enemyPrefabs[index], spawnPosition, Quaternion.identity);
+    }
+}
