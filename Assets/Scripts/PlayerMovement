@@ -1,0 +1,46 @@
+using UnityEngine;
+
+public class PlayerMovement : MonoBehaviour
+{
+    public float moveSpeed = 5f;
+    public float bankAngle = 30f;
+    public float bankSpeed = 5f;
+
+    private float currentBank;
+    private Camera mainCamera;
+    private PlayerHealth health;
+
+    void Start()
+    {
+        mainCamera = Camera.main;
+        health = GetComponent<PlayerHealth>();
+    }
+
+    void Update()
+    {
+        if (health != null && health.currentHealth <= 0) return;
+
+        float moveX = Input.GetAxisRaw("Horizontal");
+        float moveZ = Input.GetAxisRaw("Vertical");
+        Vector3 movement = new Vector3(moveX, 0f, moveZ).normalized * moveSpeed * Time.deltaTime;
+        transform.Translate(movement, Space.World);
+
+        float distance = Mathf.Abs(mainCamera.transform.position.y - transform.position.y);
+        Vector3 leftBottom = mainCamera.ScreenToWorldPoint(new Vector3(0, 0, distance));
+        Vector3 rightTop = mainCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, distance));
+        float buffer = 0.5f;
+        float minX = leftBottom.x + buffer;
+        float maxX = rightTop.x - buffer;
+        float minZ = leftBottom.z + buffer;
+        float maxZ = rightTop.z - buffer;
+
+        Vector3 clampedPosition = transform.position;
+        clampedPosition.x = Mathf.Clamp(clampedPosition.x, minX, maxX);
+        clampedPosition.z = Mathf.Clamp(clampedPosition.z, minZ, maxZ);
+        transform.position = clampedPosition;
+
+        float targetBank = -moveX * bankAngle;
+        currentBank = Mathf.Lerp(currentBank, targetBank, Time.deltaTime * bankSpeed);
+        transform.rotation = Quaternion.Euler(0f, 0f, currentBank);
+    }
+}
