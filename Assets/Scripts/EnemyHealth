@@ -1,0 +1,23 @@
+using UnityEngine;
+
+public class EnemyHealth : MonoBehaviour
+{
+    public float maxHealth = 2f; // More hits to kill than player bullets
+    private float currentHealth;
+
+    void Start()
+    {
+        currentHealth = maxHealth;
+    }
+
+    public void TakeDamage(float damage)
+    {
+        currentHealth -= damage;
+        Debug.Log("Enemy health: " + currentHealth);
+        if (currentHealth <= 0)
+        {
+            Destroy(gameObject);
+            // Spawn metal pickup here later
+        }
+    }
+}
