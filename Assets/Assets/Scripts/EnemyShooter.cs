@@ -1,0 +1,36 @@
+using UnityEngine;
+
+public class EnemyShooter : MonoBehaviour
+{
+    public GameObject enemyBulletPrefab;
+    public float fireRate = 1.5f;
+    public Transform firePoint; // Should be Transform type
+
+    private float nextFireTime;
+
+    void Start()
+    {
+        nextFireTime = Time.time + Random.Range(0f, fireRate);
+    }
+
+    void Update()
+    {
+        if (Time.time >= nextFireTime)
+        {
+            FireBullet();
+            nextFireTime = Time.time + fireRate;
+        }
+    }
+
+    void FireBullet()
+    {
+        GameObject bullet = Instantiate(enemyBulletPrefab, firePoint.position, Quaternion.identity);
+        Rigidbody rb = bullet.GetComponent<Rigidbody>();
+        rb.linearVelocity = Vector3.back * 10f;
+        BulletCollision bulletScript = bullet.GetComponent<BulletCollision>();
+        if (bulletScript != null)
+        {
+            bulletScript.isEnemyBullet = true;
+        }
+    }
+}
